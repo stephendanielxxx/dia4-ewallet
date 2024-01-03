@@ -1,17 +1,21 @@
 package com.ideaco.ewallet.service;
 
+import com.ideaco.ewallet.dto.BalanceDTO;
 import com.ideaco.ewallet.dto.TransferDTO;
+import com.ideaco.ewallet.dto.UserDTO;
 import com.ideaco.ewallet.exception.BalanceNotAvailableException;
 import com.ideaco.ewallet.exception.UserNotFoundException;
 import com.ideaco.ewallet.model.BalanceModel;
 import com.ideaco.ewallet.model.TransactionModel;
+import com.ideaco.ewallet.model.UserBalanceModel;
 import com.ideaco.ewallet.model.UserModel;
 import com.ideaco.ewallet.repository.BalanceRepository;
 import com.ideaco.ewallet.repository.TransactionRepository;
 import com.ideaco.ewallet.repository.UserRepository;
-import jakarta.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -63,11 +67,33 @@ public class TransactionService {
         optionalBalanceModel.get().setBalance(senderInitialBalance - transactionAmount); //saldo awal - transfer amount
         balanceRepository.save(optionalBalanceModel.get());
 
-        transactionModel.setTransactionStatus("SUCCESS");
+        transactionModel.setTransactionStatus("SUCCESSSUCCESS");
         TransactionModel transferModel = transactionRepository.save(transactionModel);
 
         return convertDTO(transferModel);
 
+    }
+
+    public BalanceDTO getUserBalance(int userId) throws UserNotFoundException{
+        Optional<UserBalanceModel> userBalance = balanceRepository.getUserBalance(userId);
+        if(userBalance.isEmpty()){
+            throw new UserNotFoundException("User not found");
+        }
+        return convertDTO(userBalance.get());
+    }
+
+    private BalanceDTO convertDTO(UserBalanceModel userBalanceModel){
+        BalanceDTO balanceDTO = new BalanceDTO();
+        balanceDTO.setBalanceId(userBalanceModel.getBalanceId());
+        balanceDTO.setBalance(userBalanceModel.getBalanceAmount());
+
+        UserDTO userDTO = new UserDTO();
+        userDTO.setUserId(userBalanceModel.getUserId());
+        userDTO.setUserName(userBalanceModel.getUserName());
+        userDTO.setUserPhone(userBalanceModel.getUserPhone());
+
+        balanceDTO.setUser(userDTO);
+        return balanceDTO;
     }
 
     private TransferDTO convertDTO(TransactionModel transactionModel){

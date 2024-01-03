@@ -1,16 +1,15 @@
 package com.ideaco.ewallet.controller;
 
+import com.ideaco.ewallet.dto.BalanceDTO;
 import com.ideaco.ewallet.dto.TransferDTO;
 import com.ideaco.ewallet.exception.BalanceNotAvailableException;
 import com.ideaco.ewallet.exception.UserNotFoundException;
+import com.ideaco.ewallet.response.BalanceResponse;
 import com.ideaco.ewallet.response.TransferResponse;
 import com.ideaco.ewallet.service.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/transaction")
@@ -47,5 +46,24 @@ public class TransactionController {
             return ResponseEntity.badRequest().body(transferResponse);
         }
 
+    }
+
+    @GetMapping("/balance/{userId}")
+    public ResponseEntity<BalanceResponse> getUserBalance(@PathVariable("userId") int userId){
+        BalanceResponse balanceResponse = new BalanceResponse();
+        try {
+            BalanceDTO userBalance = transactionService.getUserBalance(userId);
+            balanceResponse.setSuccess(true);
+            balanceResponse.setMessage("Success");
+            balanceResponse.setData(userBalance);
+
+            return ResponseEntity.ok().body(balanceResponse);
+        } catch (UserNotFoundException e) {
+            balanceResponse.setSuccess(false);
+            balanceResponse.setMessage("Failed");
+            balanceResponse.setData(new BalanceDTO());
+
+            return ResponseEntity.badRequest().body(balanceResponse);
+        }
     }
 }

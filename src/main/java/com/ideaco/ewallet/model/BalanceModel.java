@@ -17,4 +17,5 @@ public class BalanceModel {
     private int userId;
     @Column(name = "balance")
     private int balance;
+
 }
